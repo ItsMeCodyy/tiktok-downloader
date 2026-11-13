@@ -115,3 +115,126 @@ footer{display:flex;justify-content:space-between;gap:15px;border-top:1px solid 
 }
 .download-btn { gap: 10px; }
 .download-btn.disabled { pointer-events: none; }
+
+
+/* Liquid-glass navbar — isolated from the rest of the page. */
+.glass-filter-defs {
+  position: absolute;
+  width: 0;
+  height: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.topbar {
+  --glass-x: 50%;
+  --glass-y: 50%;
+  position: sticky;
+  top: 16px;
+  z-index: 50;
+  isolation: isolate;
+  height: 84px;
+  margin-top: 16px;
+  padding: 0 26px;
+  border: 1px solid rgba(255, 255, 255, 0.17);
+  border-radius: 24px;
+  background: rgba(8, 8, 8, 0.18);
+  box-shadow:
+    0 14px 42px rgba(0, 0, 0, 0.22),
+    inset 0 1px 0 rgba(255, 255, 255, 0.13),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.035);
+}
+
+.topbar::before,
+.topbar::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  z-index: -1;
+}
+
+.topbar::before {
+  background: rgba(19, 19, 19, 0.35);
+  -webkit-backdrop-filter: blur(16px) saturate(140%);
+  backdrop-filter: blur(16px) saturate(140%);
+}
+
+.topbar::after {
+  inset: 1px;
+  border: 1px solid rgba(255, 255, 255, 0.035);
+  background:
+    radial-gradient(
+      ellipse 52% 120% at var(--glass-x) var(--glass-y),
+      rgba(255, 255, 255, 0.10),
+      rgba(255, 255, 255, 0.018) 54%,
+      transparent 82%
+    ),
+    linear-gradient(
+      112deg,
+      transparent 10%,
+      rgba(255, 255, 255, 0.04) 35%,
+      transparent 57%,
+      rgba(255, 255, 255, 0.05) 77%,
+      transparent 93%
+    );
+  background-size: 100% 100%, 190% 100%;
+  background-position: center, 0% center;
+  animation: nav-liquid-shine 11s ease-in-out infinite alternate;
+  opacity: 0.8;
+}
+
+.topbar .brand,
+.topbar .github {
+  position: relative;
+  z-index: 2;
+}
+
+.topbar .github {
+  color: #d4d4d4;
+  transition: color 180ms ease, transform 250ms cubic-bezier(.2, .8, .2, 1);
+}
+
+.topbar .github:hover {
+  color: #fff;
+  transform: translateY(-1px);
+}
+
+@keyframes nav-liquid-shine {
+  from { background-position: center, 0% center; }
+  to { background-position: center, 100% center; }
+}
+
+/* Chromium supports displacement of real backdrop pixels. */
+@supports (-webkit-app-region: inherit) {
+  .topbar::before {
+    -webkit-backdrop-filter: url("#nav-liquid-refraction") blur(7px) saturate(150%);
+    backdrop-filter: url("#nav-liquid-refraction") blur(7px) saturate(150%);
+  }
+}
+
+@media (max-width: 700px) {
+  .topbar {
+    top: 10px;
+    margin-top: 10px;
+    height: 72px;
+    padding: 0 17px;
+    border-radius: 20px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .topbar::before {
+    -webkit-backdrop-filter: blur(16px) saturate(140%) !important;
+    backdrop-filter: blur(16px) saturate(140%) !important;
+  }
+
+  .topbar::after {
+    animation: none;
+  }
+
+  .topbar .github {
+    transition: none;
+  }
+}
