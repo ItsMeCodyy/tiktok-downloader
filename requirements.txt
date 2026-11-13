@@ -1,1 +1,1 @@
-yt-dlp>=2026.10.01
+# Standard-library-only TikTok HTML extraction; no third-party API or SDK.\n

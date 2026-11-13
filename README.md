@@ -1,21 +1,13 @@
 # cheetah.
 
-A minimal black-and-white YouTube video saver.
+Minimal black-and-white TikTok video saver.
 
-## Vercel
+## How it works
 
-Connected to Vercel with a Python serverless function (`api/index.py`) and a static frontend (`public/`). Python dependencies install from `requirements.txt`.
+The Vercel Python function requests the **public TikTok video page** and reads its embedded `__UNIVERSAL_DATA_FOR_REHYDRATION__` JSON, the same page-data structure present in the supplied TikTok website archive. It searches for the matching post ID and extracts the page's `downloadAddr` or `playAddr`. No third-party downloader API, TikTok developer API, cookies, or login credentials are used.
 
-The API extracts available combined MP4 formats using `yt-dlp` and redirects to freshly resolved media URLs. It does not proxy or store video files.
+Supported links: `https://www.tiktok.com/@username/video/1234567890123456789`.
 
-**Important:** YouTube may block requests from datacenter IPs or require additional verification. A successful Vercel deployment does not guarantee extraction works for every video. Direct playback links expire, and browsers may not always offer Save Video As. For reliable production use, consider an independently hosted extraction backend and monitoring. Only download videos you own or have permission to save.
+Limitations: TikTok may block Vercel datacenter traffic or omit data for certain posts. The media link can expire, and it may contain a watermark. This implementation does not bypass login, DRM, or download restrictions. Save only content you own or have permission to download.
 
-## Local development
-
-```bash
-python3 -m pip install -r requirements.txt
-npm install
-npm run dev
-```
-
-Local Express backend remains available in `server/index.js`. Vercel uses `api/index.py` instead.
+The old YouTube backend in `server/` is retained for reference but is not used by Vercel.

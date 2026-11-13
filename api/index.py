@@ -1,97 +1,91 @@
 import json
 import re
+import html
 from http.server import BaseHTTPRequestHandler
 from urllib.parse import parse_qs, urlparse
-import yt_dlp
+from urllib.request import Request, urlopen
 
-ID = re.compile(r"^[a-zA-Z0-9_-]{11}$")
-FORMAT = re.compile(r"^[a-zA-Z0-9_-]{1,32}$")
+VIDEO = re.compile(r"^/@[A-Za-z0-9._-]+/video/(\d{15,22})/?$")
+SCRIPT = re.compile(r'<script[^>]*id=["\']__UNIVERSAL_DATA_FOR_REHYDRATION__["\'][^>]*>(.*?)</script>', re.S)
 
-def parse_id(raw):
-    try:
-        url = urlparse(raw)
-        host = (url.hostname or "").lower()
-        if host.startswith("www.") or host.startswith("m."):
-            host = host.split(".", 1)[1]
-        if host == "youtu.be":
-            value = url.path.strip("/").split("/")[0]
-        elif host in ("youtube.com", "youtube-nocookie.com"):
-            parts = url.path.strip("/").split("/")
-            value = parse_qs(url.query).get("v", [""])[0] if url.path == "/watch" else (parts[1] if len(parts) > 1 and parts[0] in ("shorts", "live", "embed") else "")
-        else:
-            return None
-        return value if ID.fullmatch(value) else None
-    except Exception:
-        return None
+def fetch_page(url):
+    request = Request(url, headers={
+        "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36",
+        "Accept": "text/html,application/xhtml+xml",
+        "Accept-Language": "en-US,en;q=0.9",
+    })
+    with urlopen(request, timeout=14) as response:
+        if response.geturl().startswith("https://www.tiktok.com/"):
+            return response.read(4000000).decode("utf-8", "replace")
+        raise ValueError("Unexpected redirect")
 
-def extract(video_id):
-    with yt_dlp.YoutubeDL({
-        "quiet": True, "no_warnings": True, "noplaylist": True,
-        "skip_download": True, "socket_timeout": 14,
-        "extractor_args": {"youtube": {"player_client": ["android", "web"]}}
-    }) as ydl:
-        return ydl.extract_info("https://www.youtube.com/watch?v=" + video_id, download=False)
+def parse_video(raw):
+    url = urlparse(raw)
+    if url.scheme != "https" or url.hostname not in ("www.tiktok.com", "tiktok.com"):
+        raise ValueError("Use a full TikTok video URL, like https://www.tiktok.com/@user/video/123...")
+    match = VIDEO.fullmatch(url.path)
+    if not match:
+        raise ValueError("Use a TikTok post URL containing @username/video/ID.")
+    return match.group(1), "https://www.tiktok.com" + url.path
 
-def formats_of(video):
-    results = []
-    seen = set()
-    for f in sorted(video.get("formats") or [], key=lambda x: x.get("height") or 0, reverse=True):
-        if f.get("ext") != "mp4" or f.get("vcodec") == "none" or f.get("acodec") == "none" or not f.get("url"):
-            continue
-        label = str(f.get("height") or "") + "p" if f.get("height") else "MP4"
-        if label in seen:
-            continue
-        seen.add(label)
-        results.append({"id": f.get("format_id"), "label": label, "height": f.get("height") or 0, "size": f.get("filesize") or f.get("filesize_approx")})
-    return results
+def find_item(page, video_id):
+    match = SCRIPT.search(page)
+    if not match:
+        raise ValueError("TikTok did not provide public video data in the page.")
+    data = json.loads(html.unescape(match.group(1))).get("__DEFAULT_SCOPE__", {})
+    candidates = []
+    for key, value in data.items():
+        if key == "webapp.updated-items" and isinstance(value, list):
+            candidates.extend(value)
+        if isinstance(value, dict):
+            detail = value.get("itemInfo", {}).get("itemStruct") if isinstance(value.get("itemInfo"), dict) else None
+            if isinstance(detail, dict):
+                candidates.append(detail)
+            item = value.get("itemStruct")
+            if isinstance(item, dict):
+                candidates.append(item)
+    return next((item for item in candidates if str(item.get("id")) == video_id), None)
+
+def details(item):
+    video = item.get("video") or {}
+    address = video.get("downloadAddr") or video.get("playAddr")
+    if not address:
+        raise ValueError("No downloadable video address is present in the page.")
+    parsed = urlparse(address)
+    if parsed.scheme != "https" or not (parsed.hostname or "").endswith((".tiktok.com", ".tiktokcdn.com", ".tiktokv.com")):
+        raise ValueError("TikTok returned an unsupported video host.")
+    author = item.get("author") or {}
+    return {
+        "title": item.get("desc") or "TikTok video",
+        "uploader": author.get("uniqueId") or "TikTok",
+        "thumbnail": video.get("cover") or video.get("originCover") or "",
+        "duration": video.get("duration") or 0,
+        "media": address
+    }
 
 class handler(BaseHTTPRequestHandler):
-    def respond(self, code, data):
-        body = json.dumps(data).encode()
-        self.send_response(code)
+    def reply(self, status, payload):
+        data = json.dumps(payload).encode("utf-8")
+        self.send_response(status)
         self.send_header("Content-Type", "application/json")
         self.send_header("Cache-Control", "no-store")
-        self.send_header("Content-Length", str(len(body)))
+        self.send_header("Content-Length", str(len(data)))
         self.end_headers()
-        self.wfile.write(body)
+        self.wfile.write(data)
 
     def do_GET(self):
-        path = urlparse(self.path)
-        query = parse_qs(path.query)
-        if path.path.endswith("/info"):
-            video_id = parse_id(query.get("url", [""])[0])
-            if not video_id:
-                return self.respond(400, {"error": "Paste a valid YouTube link."})
-            try:
-                video = extract(video_id)
-                return self.respond(200, {
-                    "id": video_id, "title": video.get("title") or "Untitled video",
-                    "uploader": video.get("uploader") or "YouTube",
-                    "duration": video.get("duration") or 0,
-                    "thumbnail": "https://i.ytimg.com/vi/" + video_id + "/hqdefault.jpg",
-                    "formats": formats_of(video)
-                })
-            except Exception:
-                return self.respond(502, {"error": "Couldn't load this video. YouTube may be restricting access. Try another public video."})
-        if path.path.endswith("/open"):
-            video_id = query.get("id", [""])[0]
-            fmt = query.get("format", [""])[0]
-            if not ID.fullmatch(video_id) or not FORMAT.fullmatch(fmt):
-                return self.respond(400, {"error": "Invalid video or quality."})
-            try:
-                video = extract(video_id)
-                selected = next((f for f in video.get("formats", []) if f.get("format_id") == fmt and f.get("ext") == "mp4" and f.get("vcodec") != "none" and f.get("acodec") != "none"), None)
-                if not selected:
-                    return self.respond(404, {"error": "Quality unavailable. Refresh the video."})
-                destination = selected.get("url", "")
-                parsed = urlparse(destination)
-                if parsed.scheme != "https" or not (parsed.hostname or "").endswith(".googlevideo.com"):
-                    return self.respond(502, {"error": "Unsupported video host."})
-                self.send_response(302)
-                self.send_header("Location", destination)
-                self.send_header("Cache-Control", "no-store")
-                self.end_headers()
-            except Exception:
-                return self.respond(502, {"error": "Couldn't open this video. Try refreshing."})
-            return
-        return self.respond(404, {"error": "Not found"})
+        route = urlparse(self.path)
+        params = parse_qs(route.query)
+        if route.path != "/api/info":
+            return self.reply(404, {"error": "Not found"})
+        try:
+            video_id, url = parse_video(params.get("url", [""])[0])
+            item = find_item(fetch_page(url), video_id)
+            if not item:
+                raise ValueError("Couldn't find that post in TikTok's page data. It may be private or restricted.")
+            info = details(item)
+            return self.reply(200, info)
+        except ValueError as exc:
+            return self.reply(400, {"error": str(exc)})
+        except Exception:
+            return self.reply(502, {"error": "TikTok didn't return readable video data. Try a public video or try again later."})
