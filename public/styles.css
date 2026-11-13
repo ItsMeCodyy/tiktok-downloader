@@ -222,3 +222,10 @@ footer{display:flex;justify-content:space-between;gap:15px;border-top:1px solid 
     backdrop-filter: blur(18px) saturate(140%) !important;
   }
 }
+
+/* Cleaner video result */
+.result-content #video-title { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; overflow-wrap: anywhere; font-size: clamp(20px, 2.4vw, 29px); line-height: 1.25; }
+.result-content .watermark-row { margin-top: 12px; padding: 15px 0; }
+.result-content .watermark-help:empty { display: none; }
+.result-content .watermark-help { margin: 0 0 12px; }
+.result-content .download-btn { margin-top: 12px; }
