@@ -4,7 +4,7 @@ A minimal black-and-white TikTok video downloader.
 
 ## How it works
 
-1. Read embedded public TikTok video page JSON without a third-party downloader API, cookies, or login.
+1. Read embedded public TikTok video page JSON without a third-party downloader API or login. The server forwards the anonymous tt_chain_token cookie issued by TikTok's public page when requesting the MP4; no visitor account cookies are needed.
 2. Find available versions: playback video (usually without TikTok's overlay) and TikTok download version (usually with watermark).
 3. Select the TikTok watermark switch if both are available.
 4. Stream the selected MP4 from a Node.js Vercel function as an attachment, with a filename. The browser downloads the file without opening the TikTok media URL.
