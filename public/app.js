@@ -24,9 +24,7 @@ function updateLink() {
   link.href=available ? "/api/download?url="+encodeURIComponent(current.url)+"&mode="+mode : "#";
   link.classList.toggle("disabled",!available);
   link.setAttribute("aria-disabled",String(!available));
-  help.textContent=!available ? "This version isn't available for this video." :
-    toggle.checked ? "Includes TikTok's logo and username when provided." :
-    "Uses the playback copy. Creator-added overlays may remain.";
+  help.textContent=available ? "" : "This version isn't available.";
 }
 
 paste.addEventListener("click",async ()=>{
