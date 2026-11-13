@@ -2,8 +2,17 @@
   "version": 2,
   "builds": [
     {
-      "src": "api/*.js",
+      "src": "api/info.js",
       "use": "@vercel/node"
+    },
+    {
+      "src": "api/download.js",
+      "use": "@vercel/node",
+      "config": {
+        "includeFiles": [
+          "node_modules/ffmpeg-static/ffmpeg"
+        ]
+      }
     },
     {
       "src": "public/**",
