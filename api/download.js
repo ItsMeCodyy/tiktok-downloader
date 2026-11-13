@@ -12,7 +12,7 @@ export default async function handler(req,res) {
     const post=await getPost(req.query.url || "");
     const source=post.sources[mode];
     if (!source) return res.status(404).json({error:"This video doesn't offer that version."});
-    const upstream=await openMedia(source,abort.signal);
+    const upstream=await openMedia(source,abort.signal,post.cookie);
     if (!upstream.body) throw new TikTokError("The video stream was empty.");
     const filename="cheetah-"+post.id+"-"+(mode==="clean"?"no-watermark":"with-watermark")+".mp4";
     res.setHeader("Content-Type","video/mp4");
