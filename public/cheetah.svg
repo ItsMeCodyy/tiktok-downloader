@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128">
+  <title>cute white cheetah</title>
+  <path d="M24 47 17 20Q15 11 25 16L47 29Q64 24 81 29L103 16Q113 11 111 20L104 47Q114 63 108 87Q99 112 64 114Q29 112 20 87Q14 63 24 47Z" fill="#f9f9f9"/>
+  <path d="M24 27 30 45 44 35Z M104 27 98 45 84 35Z" fill="#777"/>
+  <ellipse cx="43" cy="70" rx="6" ry="8" fill="#0b0b0b"/>
+  <ellipse cx="85" cy="70" rx="6" ry="8" fill="#0b0b0b"/>
+  <circle cx="45" cy="67" r="1.8" fill="#fff"/>
+  <circle cx="87" cy="67" r="1.8" fill="#fff"/>
+  <path d="M38 78Q36 88 32 94 M90 78Q92 88 96 94" fill="none" stroke="#101010" stroke-width="3.4" stroke-linecap="round"/>
+  <path d="M57 89Q64 84 71 89L65 96Q63 97 61 95Z" fill="#101010"/>
+  <path d="M63 96Q56 104 49 98M65 96Q72 104 79 98" fill="none" stroke="#101010" stroke-width="2.5" stroke-linecap="round"/>
+  <circle cx="26" cy="67" r="3.4" fill="#171717"/><circle cx="31" cy="56" r="2.3" fill="#171717"/><circle cx="101" cy="67" r="3.4" fill="#171717"/><circle cx="97" cy="56" r="2.3" fill="#171717"/>
+  <circle cx="47" cy="44" r="2.6" fill="#171717"/><circle cx="64" cy="39" r="3.3" fill="#171717"/><circle cx="81" cy="44" r="2.6" fill="#171717"/>
+</svg>
