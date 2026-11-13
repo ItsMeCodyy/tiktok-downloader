@@ -229,3 +229,97 @@ footer{display:flex;justify-content:space-between;gap:15px;border-top:1px solid 
 .result-content .watermark-help:empty { display: none; }
 .result-content .watermark-help { margin: 0 0 12px; }
 .result-content .download-btn { margin-top: 12px; }
+
+
+/* Compact format and quality choices inside the existing video card. */
+.download-options {
+  display: flex;
+  align-items: stretch;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.format-tabs {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  padding: 4px;
+  background: #242424;
+  border: 1px solid #343434;
+  border-radius: 12px;
+}
+
+.format-tab {
+  height: 35px;
+  min-width: 70px;
+  padding: 0 15px;
+  border: 0;
+  background: transparent;
+  color: #aaa;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 800;
+  transition: background 160ms ease, color 160ms ease;
+}
+
+.format-tab.active {
+  background: #f4f4f4;
+  color: #0d0d0d;
+}
+
+.format-tab:focus-visible,
+.quality-wrap select:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 2px;
+}
+
+.quality-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+  flex: 1;
+  min-width: 0;
+}
+
+.quality-wrap select {
+  width: 100%;
+  min-width: 0;
+  height: 45px;
+  padding: 0 38px 0 15px;
+  appearance: none;
+  background: #1c1c1c;
+  border: 1px solid #343434;
+  border-radius: 12px;
+  color: #f3f3f3;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.quality-wrap select:disabled {
+  opacity: .75;
+  cursor: default;
+}
+
+.quality-wrap svg {
+  position: absolute;
+  right: 15px;
+  pointer-events: none;
+  color: #b0b0b0;
+}
+
+.watermark-row[hidden],
+.watermark-help[hidden] {
+  display: none !important;
+}
+
+.result-content .watermark-row {
+  margin-top: 10px;
+}
+
+@media (max-width: 390px) {
+  .format-tab {
+    min-width: 58px;
+    padding: 0 10px;
+  }
+}

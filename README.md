@@ -19,3 +19,9 @@ A minimal black-and-white TikTok video downloader.
 ## Notes
 
 TikTok may restrict datacenter requests or change its page data. No-watermark playback is not guaranteed for every video and creator-added overlays remain. Some posts offer only one downloadable version. Serverless bandwidth and duration limits apply. Only save videos you have permission to download.
+
+## MP3 and quality choices
+
+The result card offers MP4 or MP3. MP4 shows only the real qualities advertised in the public TikTok page (`bitrateInfo`); watermark downloads generally have one original version. MP3 is converted from the available TikTok video by FFmpeg running inside the Vercel Node function, with output bitrates of 128, 192, and 256 kbps. Higher output bitrates do not restore quality missing from the source.
+
+The `ffmpeg-static` binary is included in the Vercel function bundle and has its own GPL licensing requirements. MP3 conversion takes CPU time and may fail on longer clips if the hosting function reaches its limits.

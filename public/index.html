@@ -78,6 +78,19 @@
         <div class="result-content">
           <h2 id="video-title"></h2>
           <p class="video-meta" id="video-meta"></p>
+          <div class="download-options">
+            <div class="format-tabs" role="group" aria-label="file format">
+              <button class="format-tab active" id="format-mp4" type="button" aria-pressed="true">MP4</button>
+              <button class="format-tab" id="format-mp3" type="button" aria-pressed="false">MP3</button>
+            </div>
+            <div class="quality-wrap">
+              <label class="sr-only" for="download-quality">quality</label>
+              <select id="download-quality" aria-label="download quality"></select>
+              <svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="m6 9 6 6 6-6"/>
+              </svg>
+            </div>
+          </div>
           <div class="watermark-row">
             <div class="watermark-copy">
               <span>watermark</span>
